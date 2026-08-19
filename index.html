@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#FFFDF7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="主题天" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/miffy-swing.jpg" />
+  <title>主题天 · 给生活一个小目标</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- 应用主容器（移动端优先，桌面端居中成卡片状） -->
+  <div class="app">
+
+    <!-- ============ 首页 ============ -->
+    <section id="view-home" class="view active">
+      <header class="page-header">
+        <div class="brand">
+          <!-- 米菲荡秋千 -->
+          <img class="miffy-logo" src="assets/miffy-swing.jpg" alt="Miffy" />
+          <div>
+            <h1 class="brand-title">主题天</h1>
+            <p class="brand-sub">今天，也给生活一个小目标。</p>
+          </div>
+        </div>
+        <!-- 清新装饰：右上角小花 -->
+        <span class="deco-flower" aria-hidden="true">✿</span>
+      </header>
+
+      <main class="home-body" id="home-body">
+        <!-- 内容由 app.js 渲染 -->
+      </main>
+    </section>
+
+    <!-- ============ 主题管理 ============ -->
+    <section id="view-themes" class="view">
+      <header class="page-header">
+        <h1 class="page-title">主题管理</h1>
+        <button class="btn btn-primary btn-sm" data-action="open-new-theme">＋ 新建</button>
+      </header>
+
+      <div class="themes-summary" id="themes-summary">
+        <!-- 数量统计由 app.js 渲染 -->
+      </div>
+
+      <div class="filter-bar">
+        <input type="search" id="theme-search" class="search-input" placeholder="搜索主题名称 / 介绍" />
+        <div class="seg" id="theme-filter">
+          <button class="seg-item active" data-filter="all">全部</button>
+          <button class="seg-item" data-filter="enabled">启用</button>
+          <button class="seg-item" data-filter="disabled">停用</button>
+        </div>
+      </div>
+
+      <main class="themes-body" id="themes-body">
+        <!-- 列表由 app.js 渲染 -->
+      </main>
+    </section>
+
+    <!-- ============ 历史 ============ -->
+    <section id="view-history" class="view">
+      <header class="page-header">
+        <h1 class="page-title">历史</h1>
+      </header>
+      <main class="history-body" id="history-body">
+        <!-- 统计 + 列表由 app.js 渲染 -->
+      </main>
+    </section>
+
+    <!-- ============ 设置 ============ -->
+    <section id="view-settings" class="view">
+      <header class="page-header">
+        <h1 class="page-title">设置</h1>
+      </header>
+      <main class="settings-body" id="settings-body">
+        <!-- 由 app.js 渲染 -->
+      </main>
+    </section>
+
+    <!-- ============ 底部固定导航 ============ -->
+    <nav class="tabbar">
+      <button class="tab active" data-view="home">
+        <svg viewBox="0 0 24 24" class="tab-icon"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
+        <span>首页</span>
+      </button>
+      <button class="tab" data-view="themes">
+        <svg viewBox="0 0 24 24" class="tab-icon"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+        <span>主题</span>
+      </button>
+      <button class="tab" data-view="history">
+        <svg viewBox="0 0 24 24" class="tab-icon"><path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9zm0 4v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>历史</span>
+      </button>
+      <button class="tab" data-view="settings">
+        <svg viewBox="0 0 24 24" class="tab-icon"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9 4l-2-1 0-2-2 1-2-1-1-2-2 1-2-1-1 2-2 1 0 2 2 1 0 2 2-1 2 1 1 2 2-1 2 1 0-2-2-1 0-2-2 1z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span>设置</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ============ 通用弹窗：主题表单 ============ -->
+  <div class="modal-mask" id="theme-modal" hidden>
+    <div class="modal">
+      <h2 class="modal-title" id="theme-modal-title">新建主题</h2>
+      <form id="theme-form">
+        <input type="hidden" id="f-id" />
+        <label class="field">
+          <span class="field-label">主题名称 *</span>
+          <input type="text" id="f-name" maxlength="20" placeholder="例如：不喝奶茶日" required />
+        </label>
+
+        <div class="field-row">
+          <label class="field field-emoji">
+            <span class="field-label">Emoji / 图标</span>
+            <input type="text" id="f-emoji" maxlength="4" placeholder="🐰 或点选下方" />
+            <div class="emoji-picker" id="emoji-picker"></div>
+          </label>
+          <label class="field field-color">
+            <span class="field-label">主题颜色</span>
+            <div class="color-row" id="color-row"></div>
+            <input type="color" id="f-color" value="#F4D35E" />
+          </label>
+        </div>
+
+        <label class="field">
+          <span class="field-label">简单介绍 *</span>
+          <textarea id="f-intro" rows="2" maxlength="120" placeholder="这个主题想带来什么改变？" required></textarea>
+        </label>
+
+        <label class="field">
+          <span class="field-label">必须达到的目标 *</span>
+          <textarea id="f-goal" rows="2" maxlength="120" placeholder="今天必须做到什么？" required></textarea>
+        </label>
+
+        <label class="field">
+          <span class="field-label">小建议（可选）</span>
+          <textarea id="f-tips" rows="2" maxlength="120" placeholder="给一点温柔的提示～"></textarea>
+        </label>
+
+        <label class="switch-field">
+          <span>启用（启用后参与随机抽取）</span>
+          <span class="switch"><input type="checkbox" id="f-enabled" checked /><span class="slider"></span></span>
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-action="close-modal">取消</button>
+          <button type="submit" class="btn btn-primary">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ 通用弹窗：二次确认 ============ -->
+  <div class="modal-mask" id="confirm-modal" hidden>
+    <div class="modal modal-sm">
+      <p class="confirm-text" id="confirm-text">确定吗？</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-action="close-confirm">取消</button>
+        <button type="button" class="btn btn-danger" id="confirm-ok">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 轻量反馈提示 -->
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

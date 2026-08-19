@@ -1,0 +1,13 @@
+# 私有记忆 / 工作区元数据（不含源码，勿上传）
+.workbuddy/
+
+# 临时测试目录
+.smoke/
+
+# 操作系统 / 编辑器
+Thumbs.db
+.DS_Store
+*.log
+
+# 本地服务器缓存
+npmcache/

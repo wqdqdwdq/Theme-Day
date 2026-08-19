@@ -1,0 +1,26 @@
+{
+  "name": "主题天 · 给生活一个小目标",
+  "short_name": "主题天",
+  "description": "打开 → 看今天主题 → 完成目标 → 打勾。一个给自己增加小目标与仪式感的轻量生活工具。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFDF7",
+  "theme_color": "#FFFDF7",
+  "icons": [
+    {
+      "src": "assets/miffy-swing.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/miffy-swing.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
