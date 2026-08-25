@@ -232,13 +232,16 @@
 
     const canRedraw = ch.redrawCount < settings.maxRedraws;
     const redrawLeft = settings.maxRedraws - ch.redrawCount;
+    const redrawTimesCN = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+    const redrawLeftCN = redrawLeft >= 0 && redrawLeft <= 10 ? redrawTimesCN[redrawLeft] : String(redrawLeft);
 
     const doneBtn = doneToday
       ? `<button class="btn btn-done btn-block pop" disabled>✓ 今日已完成</button>`
       : `<button class="btn btn-primary btn-block" data-action="complete">今日完成</button>`;
 
     const redrawBtn = canRedraw
-      ? `<button class="btn btn-pill" data-action="redraw">↻ 换一个 · 剩 ${redrawLeft} 次</button>`
+      ? `<button class="btn btn-pill" data-action="redraw">↻ 换一个</button>
+         <span class="redraw-left">还有 ${redrawLeftCN} 次轮换机会</span>`
       : '';
 
     return `
@@ -380,7 +383,7 @@
     current.completions = {};
     await DB.setCurrentChallenge(current);
     renderHome();
-    toast(`已换成「${chosen.name}」，还剩 ${settings.maxRedraws - current.redrawCount} 次`);
+    toast(`已换成「${chosen.name}」，还有 ${settings.maxRedraws - current.redrawCount} 次轮换机会`);
   }
 
   async function completeToday() {

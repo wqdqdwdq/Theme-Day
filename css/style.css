@@ -240,7 +240,15 @@ html, body {
   border: none; font-size: 13.5px; padding: 0 10px; height: 44px;
 }
 .btn-text:active { color: #8a8576; }
+/* 换一个按钮旁的剩余轮换次数提示 */
+.redraw-left {
+  flex: 1 1 auto; align-self: center;
+  font-size: 12.5px; color: var(--text2);
+  padding: 0 6px; text-align: center; line-height: 1.25;
+}
 @media (max-width: 360px) {
+  .redraw-left { padding-top: 2px; }
+}
   .row-actions { flex-direction: column; }
   .row-actions .btn { width: 100%; }
 }
