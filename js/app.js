@@ -85,7 +85,21 @@
 
   /* -------------------- 初始化 -------------------- */
   async function ensureSeed() {
-    if (await DB.isSeeded()) return;
+    if (await DB.isSeeded()) {
+      // 老数据兼容：为缺失 id 的主题补一个稳定 id
+      // （否则下面"不重复抽取池"用 theme.id 匹配时会全部落空，导致已完成的主题又被抽回来）
+      const list = await DB.getThemes();
+      if (Array.isArray(list) && list.length) {
+        let changed = false;
+        const fixed = list.map((t) => {
+          if (t && t.id) return t;
+          changed = true;
+          return { ...t, id: uid('t') };
+        });
+        if (changed) await DB.saveThemes(fixed);
+      }
+      return;
+    }
     const seeded = DEFAULT_THEMES.map((t) => ({ id: uid('t'), createdAt: new Date().toISOString(), ...t }));
     await DB.saveThemes(seeded);
     await DB.setSeeded(true);
@@ -144,8 +158,9 @@
       status, // 'completed' | 'ended_early'
       finishedAt: new Date().toISOString(),
     };
-    // 自然完成（非提前结束）的主题，放入不重复抽取池
-    if (status === 'completed' && challenge.theme && challenge.theme.id) {
+    // 自然完成（非提前结束）且用户确实完成过至少一天的主题，才放入不重复抽取池
+    // （只让"真的做过"的主题休息，轮完一圈再重来；0 天完成的视为没做，可再被抽到）
+    if (status === 'completed' && doneDays > 0 && challenge.theme && challenge.theme.id) {
       const pool = await DB.getCyclePool();
       if (!pool.includes(challenge.theme.id)) {
         pool.push(challenge.theme.id);
@@ -271,8 +286,8 @@
       toast('请先在「主题」里启用至少一个主题');
       return;
     }
-    const pool = await DB.getCyclePool();
-    let eligible = enabled.filter((t) => !pool.includes(t.id));
+    const pool = (await DB.getCyclePool()).filter(Boolean); // 清掉历史残留的空值
+    let eligible = enabled.filter((t) => t.id && !pool.includes(t.id));
     if (eligible.length === 0) {
       // 所有主题都已完成过一轮，重置后重新开始
       eligible = enabled.slice();
@@ -345,8 +360,8 @@
     }
     const enabled = themes.filter((t) => t.enabled);
     if (enabled.length === 0) { toast('没有可抽取的主题'); return; }
-    const pool = await DB.getCyclePool();
-    let eligible = enabled.filter((t) => !pool.includes(t.id));
+    const pool = (await DB.getCyclePool()).filter(Boolean);
+    let eligible = enabled.filter((t) => t.id && !pool.includes(t.id));
     if (eligible.length === 0) { eligible = enabled.slice(); await DB.setCyclePool([]); }
     // 换一个时避免又抽到当前这一个
     let pickFrom = eligible.filter((t) => t.id !== (current.theme.id || null));
