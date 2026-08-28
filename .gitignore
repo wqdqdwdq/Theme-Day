@@ -11,3 +11,9 @@ Thumbs.db
 
 # 本地服务器缓存
 npmcache/
+
+# 根目录 jsdom 测试残留（应用无需；后端依赖在 server/）
+/node_modules/
+/package.json
+/package-lock.json
+/test_*.js

@@ -38,7 +38,7 @@ html, body {
   min-height: 100vh;
   background: var(--cream);
   position: relative;
-  padding-bottom: 84px; /* 给底部导航留位 */
+  padding-bottom: 100px; /* 给底部导航留位（导航约70px+安全区） */
   box-shadow: 0 0 40px rgba(0,0,0,0.03);
   /* 清新背景装饰（用伪元素画小圆点/云朵感） */
 }
@@ -64,6 +64,7 @@ html, body {
 .view { display: none; padding: 20px 18px 8px; }
 .view.active { display: block; animation: fade .25s ease; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
 
 /* ---------- 头部 ---------- */
 .page-header {
@@ -177,7 +178,7 @@ html, body {
 
 /* 本轮进度（圆点列表） */
 .round-progress { margin: 4px 0 16px; }
-.round-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 14px; }
+.round-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 14px; flex-wrap: wrap; }
 .round-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); flex: none; }
 .round-dot.done { background: var(--sage); border-color: var(--sage); }
 .round-dot.today { border-color: var(--yellow); box-shadow: 0 0 0 3px rgba(244,211,94,.25); }
@@ -190,10 +191,26 @@ html, body {
 .round-label { color: var(--text2); }
 .round-row.done .round-label { color: var(--text); }
 .round-action { margin-left: auto; font-size: 12px; padding: 2px 8px; border-radius: 99px; background: rgba(244,211,94,.18); color: #9a7b1e; }
+.mood-note { flex-basis: 100%; margin: 2px 0 0; font-size: 12.5px; color: var(--text2); line-height: 1.4; padding-left: 24px; }
 .round-hint { margin: 10px 0 0; font-size: 12px; color: var(--text2); text-align: center; }
 
 /* 卡片底部：起止日期 */
 .date-foot { text-align: center; color: var(--text2); font-size: 13px; margin-top: 6px; }
+
+/* ---------- 首页打卡热力图（当月日历） ---------- */
+.heatmap { background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); box-shadow:var(--shadow); padding:14px; margin-top:14px; }
+.hm-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.hm-title { font-weight:500; font-size:14px; }
+.hm-stat { font-size:12px; color:var(--text2); }
+.hm-week { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px; }
+.hm-week span { text-align:center; font-size:11px; color:var(--text2); }
+.hm-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+.hm-cell { aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; font-size:12px; border-radius:8px; background:#F4F1E8; color:var(--text2); }
+.hm-cell.empty { background:transparent; }
+.hm-cell.on { background:var(--yellow); color:#5b4a12; font-weight:500; }
+.hm-cell.today { box-shadow:0 0 0 2px var(--blue) inset; }
+.hm-legend { display:flex; align-items:center; gap:6px; margin-top:10px; font-size:12px; color:var(--text2); }
+.hm-dot { width:12px; height:12px; border-radius:4px; background:var(--yellow); display:inline-block; }
 
 /* 卡片操作按钮区 */
 .card-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
@@ -253,12 +270,13 @@ html, body {
   .row-actions .btn { width: 100%; }
 }
 
-/* ---------- 底部导航 ---------- */
+/* ---------- 底部导航（相对视口固定，始终贴最底部） ---------- */
 .tabbar {
-  position: fixed; left: 50%; transform: translateX(-50%); bottom: 0;
-  width: 100%; max-width: 480px;
+  position: fixed; left: 0; right: 0; bottom: 0;
+  width: 100%; max-width: 480px; margin: 0 auto;
   display: flex; background: rgba(255,253,247,.92); backdrop-filter: blur(8px);
   border-top: 1px solid var(--border); z-index: 20;
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 /* 导航栏上方淡淡的光晕 */
 .tabbar::before {
@@ -322,7 +340,19 @@ html, body {
   background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm);
   box-shadow: var(--shadow); padding: 14px; margin-bottom: 12px;
   border-left: 6px solid var(--sage);
+  position: relative;
 }
+.history-item .hi-del {
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: none; border: none;
+  font-size: 15px; line-height: 1;
+  color: #ccc; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: color .15s, background .15s, transform .08s;
+}
+.history-item .hi-del:hover { color: #e55; background: #fff5f5; }
+.history-item .hi-del:active { transform: scale(.9); }
 .history-item.early { border-left-color: var(--pink); }
 .history-item .hi-top { display: flex; align-items: center; gap: 10px; }
 .history-item .hi-emoji { font-size: 26px; }
@@ -338,6 +368,57 @@ html, body {
 .settings-group { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow); padding: 16px; margin-bottom: 14px; }
 .settings-group h3 { margin: 0 0 4px; font-size: 15px; }
 .settings-group p.hint { margin: 0 0 12px; font-size: 13px; color: var(--text2); }
+
+/* 导出按钮组（置顶） */
+.backup-group .backup-btns {
+  display: flex; gap: 10px; margin-bottom: 8px;
+}
+.backup-btn {
+  flex: 1; font-size: 14px !important; height: 44px !important;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+
+/* 导出面板 */
+.export-panel {
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  box-shadow: var(--shadow); padding: 16px; margin-bottom: 14px;
+}
+.export-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; font-weight: 600; font-size: 15px;
+}
+.export-close {
+  width: 28px; height: 28px; border-radius: 50%; border: none;
+  background: none; color: #ccc; font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.export-close:hover { color: #e55; background: #fff5f5; }
+.export-content {
+  background: var(--cream); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px; max-height: 260px; overflow-y: auto;
+  font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12px; line-height: 1.6; color: #555; white-space: pre-wrap;
+  word-break: break-all; margin-bottom: 10px;
+}
+
+/* 导入面板 */
+.import-panel {
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  box-shadow: var(--shadow); padding: 16px; margin-bottom: 14px;
+}
+.import-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; font-weight: 600; font-size: 15px;
+}
+.import-preview {
+  background: var(--cream); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px; max-height: 260px; overflow-y: auto;
+  font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12px; line-height: 1.6; color: #555; white-space: pre-wrap;
+  word-break: break-all; margin-bottom: 10px;
+}
+#import-pick { margin-bottom: 10px; }
+#import-confirm-btn[disabled] { opacity: .45; cursor: not-allowed; }
 .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
 .setting-row .label { font-size: 14px; }
 .stepper { display: flex; align-items: center; gap: 14px; }
@@ -375,6 +456,29 @@ html, body {
 .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
 .modal-actions .btn { flex: 1; }
 .confirm-text { font-size: 16px; margin: 6px 0 4px; }
+
+/* 提前结束：结束原因输入区 */
+.confirm-reason-wrap { text-align: left; margin: 10px 0 4px; }
+.reason-label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+.reason-input {
+  width: 100%; box-sizing: border-box; resize: none;
+  border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+  font-size: 14px; font-family: inherit; line-height: 1.5; color: var(--text1);
+  background: var(--cream); outline: none;
+}
+.reason-input:focus { border-color: var(--blue); }
+.reason-swap { margin-top: 8px; }
+
+/* 打卡记心情弹窗 */
+.mood-title { font-size: 16px; margin: 6px 0 4px; }
+.mood-input {
+  width: 100%; box-sizing: border-box; resize: none;
+  border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+  font-size: 14px; font-family: inherit; line-height: 1.5; color: var(--text1);
+  background: var(--cream); outline: none; text-align: left;
+}
+.mood-input:focus { border-color: var(--blue); }
+.mood-swap { margin-top: 8px; }
 
 /* ---------- 表单 ---------- */
 .field { display: block; margin-bottom: 14px; }
